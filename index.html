@@ -1,93 +1,260 @@
 <!DOCTYPE html>
-<html lang="es" class="scroll-smooth">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bucaramanga | La Ciudad Bonita de Colombia</title>
-    <!-- Tailwind CSS CDN -->
+    <title>Parqueadero Bucaramanga - Gestión en Tiempo Real</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- FontAwesome Icons -->
+    <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        santander: {
-                            emerald: '#0c5c36',
-                            green: '#15803d',
-                            lightgreen: '#22c55e',
-                            gold: '#d97706',
-                            goldlight: '#f59e0b',
-                            earth: '#78350f',
-                            sand: '#fef3c7',
-                            dark: '#0f172a'
-                        }
-                    },
-                    fontFamily: {
-                        poppins: ['Poppins', 'sans-serif'],
-                        montserrat: ['Montserrat', 'sans-serif'],
-                    }
-                }
-            }
-        }
-    </script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Poppins', sans-serif;
-        }
-        h1, h2, h3, h4, .font-heading {
-            font-family: 'Montserrat', sans-serif;
-        }
-        .hero-gradient {
-            background: linear-gradient(rgba(12, 92, 54, 0.75), rgba(15, 23, 42, 0.85)), url('https://images.unsplash.com/photo-1596422846543-75c6fc197f07?auto=format&fit=crop&q=80&w=1920');
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
-        }
-        .glass-card {
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .glass-panel {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(12px);
-        }
-        .modal-animate-in {
-            animation: fadeInScale 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-        @keyframes fadeInScale {
-            from {
-                opacity: 0;
-                transform: scale(0.95) translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1) translateY(0);
-            }
+            border: 1px solid rgba(229, 231, 235, 0.8);
         }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 antialiased selection:bg-santander-gold selection:text-white">
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col">
 
-    <!-- Firebase Authentication & SDK Script Module -->
+    <!-- Header / Navbar -->
+    <header class="bg-slate-800/80 border-b border-slate-700 backdrop-blur sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 font-bold text-xl">
+                    <i class="fa-solid fa-square-parking"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg leading-none text-slate-100">Parqueaderos Bucaramanga</h1>
+                    <span class="text-xs text-emerald-400 font-medium">Control de Celdas & Operación</span>
+                </div>
+            </div>
+
+            <div id="userMenu" class="flex items-center space-x-4">
+                <!-- Dynamic user panel injected by JS -->
+                <button id="openAuthBtn" onclick="openAuthModal()" class="px-4 py-2 text-sm font-semibold text-emerald-400 hover:text-emerald-300 border border-emerald-500/40 rounded-lg hover:bg-emerald-500/10 transition">
+                    <i class="fa-solid fa-user-check mr-2"></i>Iniciar Sesión / Registro
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+        
+        <!-- KPI Dashboard Cards -->
+        <section class="grid grid-cols-1 md:grid-cols-4 gap-5">
+            <div class="bg-slate-800 border border-slate-700/60 rounded-2xl p-5 shadow-lg">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Total Celdas</p>
+                        <h3 id="statTotalBays" class="text-3xl font-extrabold text-white mt-1">16</h3>
+                    </div>
+                    <div class="w-12 h-12 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center text-xl">
+                        <i class="fa-solid fa-border-all"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-slate-800 border border-slate-700/60 rounded-2xl p-5 shadow-lg">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Disponibles</p>
+                        <h3 id="statAvailableBays" class="text-3xl font-extrabold text-emerald-400 mt-1">0</h3>
+                    </div>
+                    <div class="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-xl">
+                        <i class="fa-solid fa-circle-check"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-slate-800 border border-slate-700/60 rounded-2xl p-5 shadow-lg">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Ocupadas</p>
+                        <h3 id="statOccupiedBays" class="text-3xl font-extrabold text-rose-400 mt-1">0</h3>
+                    </div>
+                    <div class="w-12 h-12 rounded-xl bg-rose-500/10 text-rose-400 flex items-center justify-center text-xl">
+                        <i class="fa-solid fa-car"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-slate-800 border border-slate-700/60 rounded-2xl p-5 shadow-lg">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">% Ocupación</p>
+                        <h3 id="statOccupancyRate" class="text-3xl font-extrabold text-amber-400 mt-1">0%</h3>
+                    </div>
+                    <div class="w-12 h-12 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center text-xl">
+                        <i class="fa-solid fa-chart-pie"></i>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Dynamic Parking Grid & Controls -->
+        <section class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            <!-- Parking Bays Layout (2 Cols width) -->
+            <div class="lg:col-span-2 bg-slate-800 border border-slate-700 rounded-2xl p-6 shadow-xl">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                    <div>
+                        <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                            <i class="fa-solid fa-map-location-dot text-emerald-400"></i> Mapa de Celdas
+                        </h2>
+                        <p class="text-xs text-slate-400">Selecciona una celda disponible para registrar ingreso</p>
+                    </div>
+
+                    <div class="flex items-center space-x-2">
+                        <span class="inline-flex items-center text-xs text-slate-300 gap-1 bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-700">
+                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Disponible
+                        </span>
+                        <span class="inline-flex items-center text-xs text-slate-300 gap-1 bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-700">
+                            <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span> Ocupado
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Grid of Bays -->
+                <div id="baysContainer" class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    <!-- Dynamic rendering by Firebase JS -->
+                </div>
+            </div>
+
+            <!-- Vehicle Entry Form / Details Panel -->
+            <div class="bg-slate-800 border border-slate-700 rounded-2xl p-6 shadow-xl flex flex-col">
+                <h2 class="text-xl font-bold text-white mb-2 flex items-center gap-2">
+                    <i class="fa-solid fa-right-to-bracket text-emerald-400"></i> Ingreso de Vehículo
+                </h2>
+                <p class="text-xs text-slate-400 mb-6">Registra la llegada de un vehículo y asigna su celda.</p>
+
+                <form id="entryForm" class="space-y-4 flex-grow flex flex-col justify-between">
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">Placa del Vehículo</label>
+                            <input type="text" id="vehiclePlate" required placeholder="ABC-123" uppercase class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 font-mono tracking-wide uppercase">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">Tipo de Vehículo</label>
+                            <select id="vehicleType" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-emerald-500">
+                                <option value="Automóvil">Automóvil ($4,000 / hora)</option>
+                                <option value="Motocicleta">Motocicleta ($2,000 / hora)</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">Cédula o Nombre Propietario</label>
+                            <input type="text" id="ownerInfo" required placeholder="Ej: 1098765432 / Juan Pérez" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">Celda Seleccionada</label>
+                            <select id="selectedBaySelect" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-emerald-400 font-semibold focus:outline-none focus:border-emerald-500">
+                                <!-- Options populated dynamically -->
+                            </select>
+                        </div>
+                    </div>
+
+                    <button type="submit" id="btnRegisterEntry" class="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold py-3 px-4 rounded-xl transition flex items-center justify-center gap-2 mt-6">
+                        <i class="fa-solid fa-circle-plus"></i> Registrar Entrada
+                    </button>
+                </form>
+            </div>
+        </section>
+
+        <!-- Active Parking Records Table -->
+        <section class="bg-slate-800 border border-slate-700 rounded-2xl p-6 shadow-xl">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                <div>
+                    <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-list-check text-emerald-400"></i> Vehículos Registrados en Sitio
+                    </h2>
+                    <p class="text-xs text-slate-400">Control de ingresos, horario y liquidación de salidas</p>
+                </div>
+
+                <div class="w-full md:w-72 relative">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-500 text-sm"></i>
+                    <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="Buscar por Placa o Cédula..." class="w-full bg-slate-900 border border-slate-700 rounded-xl pl-10 pr-4 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500">
+                </div>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm text-slate-300">
+                    <thead class="bg-slate-900/60 text-slate-400 uppercase text-xs font-semibold border-b border-slate-700">
+                        <tr>
+                            <th class="py-3 px-4">Placa</th>
+                            <th class="py-3 px-4">Tipo</th>
+                            <th class="py-3 px-4">Celda</th>
+                            <th class="py-3 px-4">Propietario / Cédula</th>
+                            <th class="py-3 px-4">Hora Ingreso</th>
+                            <th class="py-3 px-4">Estado</th>
+                            <th class="py-3 px-4 text-right">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="vehiclesTableBody" class="divide-y divide-slate-700/60">
+                        <!-- Dynamic rows -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal Autenticación Rápida (Cédula/Correo) -->
+    <div id="authModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+        <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-md w-full p-6 shadow-2xl relative">
+            <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+
+            <div class="text-center mb-6">
+                <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-2xl mx-auto mb-2">
+                    <i class="fa-solid fa-user-lock"></i>
+                </div>
+                <h3 class="text-xl font-bold text-white">Acceso Operador / Usuario</h3>
+                <p class="text-xs text-slate-400">Ingresa con tu Cédula de Ciudadanía o Nombre</p>
+            </div>
+
+            <div id="authAlert" class="hidden mb-4 p-3 rounded-lg text-xs font-semibold"></div>
+
+            <form id="authForm" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">Cédula o Nombre</label>
+                    <input type="text" id="authUserIdentifier" required placeholder="Ej: 1098765432" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">Contraseña</label>
+                    <input type="password" id="authPassword" required placeholder="••••••••" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500">
+                </div>
+
+                <div class="flex gap-3 pt-2">
+                    <button type="button" onclick="handleLogin()" class="flex-1 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold py-2.5 rounded-xl transition">
+                        Iniciar Sesión
+                    </button>
+                    <button type="button" onclick="handleRegister()" class="flex-1 border border-slate-600 hover:border-slate-500 text-slate-200 font-bold py-2.5 rounded-xl transition">
+                        Registrarse
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Firebase Realtime Database Integration Script -->
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { 
-            getAuth, 
-            createUserWithEmailAndPassword, 
-            signInWithEmailAndPassword, 
-            signOut, 
-            onAuthStateChanged,
-            updateProfile,
-            sendPasswordResetEmail
-        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
+        import { getDatabase, ref, onValue, set, update } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-database.js";
 
-        // Configuración real de Firebase proporcionada
+        // Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyAPsgOcWyxNEZx_K7-QB9GFMFg_ikOx47U",
             authDomain: "prueba987.firebaseapp.com",
+            databaseURL: "https://prueba987-default-rtdb.firebaseio.com",
             projectId: "prueba987",
             storageBucket: "prueba987.firebasestorage.app",
             messagingSenderId: "993495319022",
@@ -95,1134 +262,280 @@
             measurementId: "G-J18B6QPTZC"
         };
 
-        // Inicializar Firebase App y Auth
+        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
+        const db = getDatabase(app);
 
-        // Hacer las funciones globales para interactuar con la interfaz HTML
-        window.firebaseAuth = auth;
+        // Global State
+        let currentBays = {};
+        let currentVehicles = {};
 
-        // Escuchar el estado de autenticación en tiempo real
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                // Usuario autenticado en Firebase
-                const displayName = user.displayName || user.email.split('@')[0];
-                const email = user.email;
-                setUserAuthenticatedUI({ name: displayName, email: email });
+        // Default Bays Data if DB is empty
+        const INITIAL_BAYS = {
+            "A-01": { id: "A-01", type: "Automóvil", status: "disponible" },
+            "A-02": { id: "A-02", type: "Automóvil", status: "disponible" },
+            "A-03": { id: "A-03", type: "Automóvil", status: "disponible" },
+            "A-04": { id: "A-04", type: "Automóvil", status: "disponible" },
+            "A-05": { id: "A-05", type: "Automóvil", status: "disponible" },
+            "A-06": { id: "A-06", type: "Automóvil", status: "disponible" },
+            "A-07": { id: "A-07", type: "Automóvil", status: "disponible" },
+            "A-08": { id: "A-08", type: "Automóvil", status: "disponible" },
+            "M-01": { id: "M-01", type: "Motocicleta", status: "disponible" },
+            "M-02": { id: "M-02", type: "Motocicleta", status: "disponible" },
+            "M-03": { id: "M-03", type: "Motocicleta", status: "disponible" },
+            "M-04": { id: "M-04", type: "Motocicleta", status: "disponible" },
+            "M-05": { id: "M-05", type: "Motocicleta", status: "disponible" },
+            "M-06": { id: "M-06", type: "Motocicleta", status: "disponible" },
+            "M-07": { id: "M-07", type: "Motocicleta", status: "disponible" },
+            "M-08": { id: "M-08", type: "Motocicleta", status: "disponible" },
+        };
+
+        // Listen for Parking Bays in Realtime
+        const baysRef = ref(db, 'parking_bays');
+        onValue(baysRef, (snapshot) => {
+            const data = snapshot.val();
+            if (!data) {
+                set(baysRef, INITIAL_BAYS);
+                currentBays = INITIAL_BAYS;
             } else {
-                // Usuario sin sesión
-                setUserLoggedOutUI();
+                currentBays = data;
+            }
+            renderBays();
+            updateKPIs();
+            populateBaySelector();
+        });
+
+        // Listen for Vehicles in Realtime
+        const vehiclesRef = ref(db, 'vehicles');
+        onValue(vehiclesRef, (snapshot) => {
+            currentVehicles = snapshot.val() || {};
+            renderVehiclesTable();
+        });
+
+        // Auth State Change
+        onAuthStateChanged(auth, (user) => {
+            const userMenu = document.getElementById('userMenu');
+            if (user) {
+                const displayName = user.displayName || user.email.split('@')[0];
+                userMenu.innerHTML = `
+                    <div class="flex items-center space-x-3 bg-slate-900 border border-slate-700 px-3 py-1.5 rounded-xl">
+                        <div class="w-8 h-8 rounded-lg bg-emerald-500 text-slate-950 font-bold flex items-center justify-center text-xs">
+                            ${displayName.substring(0, 2).toUpperCase()}
+                        </div>
+                        <span class="text-sm font-semibold text-slate-200">${displayName}</span>
+                        <button onclick="handleSignOut()" class="text-xs text-rose-400 hover:text-rose-300 ml-2 font-medium">Salir</button>
+                    </div>
+                `;
+            } else {
+                userMenu.innerHTML = `
+                    <button onclick="openAuthModal()" class="px-4 py-2 text-sm font-semibold text-emerald-400 hover:text-emerald-300 border border-emerald-500/40 rounded-lg hover:bg-emerald-500/10 transition">
+                        <i class="fa-solid fa-user-check mr-2"></i>Iniciar Sesión / Registro
+                    </button>
+                `;
             }
         });
 
-        // Función de Registro con Correo y Contraseña
-        window.handleFirebaseRegister = async function(e) {
-            e.preventDefault();
-            const name = document.getElementById('register-name').value.trim();
-            const email = document.getElementById('register-email').value.trim();
-            const password = document.getElementById('register-password').value;
-            const submitBtn = document.getElementById('register-submit-btn');
+        // UI Render Functions
+        function renderBays() {
+            const container = document.getElementById('baysContainer');
+            container.innerHTML = '';
 
-            if (!email || !password || !name) return;
+            Object.values(currentBays).forEach(bay => {
+                const isOccupied = bay.status === 'ocupado';
+                const card = document.createElement('div');
+                card.className = `p-4 rounded-xl border flex flex-col justify-between transition cursor-pointer ${
+                    isOccupied 
+                    ? 'bg-rose-500/10 border-rose-500/30 text-rose-300' 
+                    : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300 hover:border-emerald-400'
+                }`;
 
-            try {
-                setLoadingButton(submitBtn, true, 'Creando cuenta...');
-                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                
-                // Actualizar el nombre de usuario en el perfil de Firebase
-                await updateProfile(userCredential.user, {
-                    displayName: name
+                card.innerHTML = `
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="font-bold text-lg text-white">${bay.id}</span>
+                        <i class="fa-solid ${bay.type === 'Automóvil' ? 'fa-car-side' : 'fa-motorcycle'} text-base"></i>
+                    </div>
+                    <div>
+                        <span class="text-xs font-semibold px-2 py-0.5 rounded ${isOccupied ? 'bg-rose-500/20 text-rose-300' : 'bg-emerald-500/20 text-emerald-300'}">
+                            ${isOccupied ? bay.plate : 'DISPONIBLE'}
+                        </span>
+                        <p class="text-[10px] text-slate-400 mt-1">${bay.type}</p>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function updateKPIs() {
+            const baysArray = Object.values(currentBays);
+            const total = baysArray.length;
+            const occupied = baysArray.filter(b => b.status === 'ocupado').length;
+            const available = total - occupied;
+            const rate = total > 0 ? Math.round((occupied / total) * 100) : 0;
+
+            document.getElementById('statTotalBays').innerText = total;
+            document.getElementById('statAvailableBays').innerText = available;
+            document.getElementById('statOccupiedBays').innerText = occupied;
+            document.getElementById('statOccupancyRate').innerText = `${rate}%`;
+        }
+
+        function populateBaySelector() {
+            const select = document.getElementById('selectedBaySelect');
+            select.innerHTML = '<option value="">-- Seleccionar Celda Libre --</option>';
+            
+            Object.values(currentBays)
+                .filter(b => b.status === 'disponible')
+                .forEach(bay => {
+                    const opt = document.createElement('option');
+                    opt.value = bay.id;
+                    opt.innerText = `${bay.id} (${bay.type})`;
+                    select.appendChild(opt);
                 });
+        }
 
-                closeAuthModal();
-                showNotification('¡Cuenta registrada!', `Bienvenido a nuestro portal, ${name}.`);
-            } catch (error) {
-                console.error("Error al registrar usuario en Firebase:", error);
-                const friendlyMessage = getFirebaseErrorMessage(error.code);
-                showNotification('Error de registro', friendlyMessage, 'error');
-            } finally {
-                setLoadingButton(submitBtn, false, 'Crear mi cuenta gratis');
-            }
-        };
+        function renderVehiclesTable() {
+            const tbody = document.getElementById('vehiclesTableBody');
+            tbody.innerHTML = '';
 
-        // Función de Inicio de Sesión con Correo y Contraseña
-        window.handleFirebaseLogin = async function(e) {
-            e.preventDefault();
-            const email = document.getElementById('login-email').value.trim();
-            const password = document.getElementById('login-password').value;
-            const submitBtn = document.getElementById('login-submit-btn');
+            const activeVehicles = Object.entries(currentVehicles)
+                .map(([id, v]) => ({ id, ...v }))
+                .filter(v => v.status === 'activo');
 
-            if (!email || !password) return;
-
-            try {
-                setLoadingButton(submitBtn, true, 'Iniciando sesión...');
-                const userCredential = await signInWithEmailAndPassword(auth, email, password);
-                const user = userCredential.user;
-                const displayName = user.displayName || user.email.split('@')[0];
-
-                closeAuthModal();
-                showNotification(`¡Hola de nuevo!`, `Sesión iniciada correctamente como ${displayName}.`);
-            } catch (error) {
-                console.error("Error al iniciar sesión en Firebase:", error);
-                const friendlyMessage = getFirebaseErrorMessage(error.code);
-                showNotification('Error al ingresar', friendlyMessage, 'error');
-            } finally {
-                setLoadingButton(submitBtn, false, 'Ingresar a mi cuenta');
-            }
-        };
-
-        // Función para Recuperar Contraseña por Correo
-        window.handlePasswordReset = async function() {
-            const email = document.getElementById('login-email').value.trim();
-            if (!email) {
-                showNotification('Correo requerido', 'Ingresa tu correo electrónico en el formulario para enviarte las instrucciones.', 'warning');
+            if (activeVehicles.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="py-6 text-center text-slate-500">No hay vehículos registrados en este momento.</td></tr>`;
                 return;
             }
 
-            try {
-                await sendPasswordResetEmail(auth, email);
-                showNotification('Correo enviado', `Se envió un correo de restablecimiento de contraseña a ${email}.`);
-            } catch (error) {
-                const friendlyMessage = getFirebaseErrorMessage(error.code);
-                showNotification('Error', friendlyMessage, 'error');
+            activeVehicles.forEach(v => {
+                const entryDate = new Date(v.entryTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                const row = document.createElement('tr');
+                row.className = "hover:bg-slate-700/30 transition";
+
+                row.innerHTML = `
+                    <td class="py-3 px-4 font-mono font-bold text-white uppercase">${v.plate}</td>
+                    <td class="py-3 px-4 text-xs">${v.type}</td>
+                    <td class="py-3 px-4 font-bold text-emerald-400">${v.bayId}</td>
+                    <td class="py-3 px-4 text-xs">${v.owner}</td>
+                    <td class="py-3 px-4 text-xs text-slate-400">${entryDate}</td>
+                    <td class="py-3 px-4"><span class="px-2 py-0.5 text-xs bg-emerald-500/10 text-emerald-400 rounded-full border border-emerald-500/20">En Sitio</span></td>
+                    <td class="py-3 px-4 text-right">
+                        <button onclick="checkoutVehicle('${v.id}', '${v.bayId}', '${v.type}', ${v.entryTime})" class="bg-rose-500/10 hover:bg-rose-500 text-rose-400 hover:text-white border border-rose-500/30 font-semibold px-3 py-1 rounded-lg text-xs transition">
+                            Liquidación / Salida
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Action Handlers
+        document.getElementById('entryForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const plate = document.getElementById('vehiclePlate').value.trim().toUpperCase();
+            const type = document.getElementById('vehicleType').value;
+            const owner = document.getElementById('ownerInfo').value.trim();
+            const bayId = document.getElementById('selectedBaySelect').value;
+
+            if (!bayId) {
+                alert('Por favor selecciona una celda disponible.');
+                return;
+            }
+
+            const vehicleId = 'V_' + Date.now();
+            const timestamp = Date.now();
+
+            // Save vehicle entry
+            set(ref(db, `vehicles/${vehicleId}`), {
+                id: vehicleId,
+                plate,
+                type,
+                owner,
+                bayId,
+                entryTime: timestamp,
+                status: 'activo'
+            });
+
+            // Update Bay status
+            update(ref(db, `parking_bays/${bayId}`), {
+                status: 'ocupado',
+                plate: plate,
+                vehicleId: vehicleId
+            });
+
+            // Clear Form
+            document.getElementById('entryForm').reset();
+        });
+
+        window.checkoutVehicle = (vehicleId, bayId, type, entryTime) => {
+            const exitTime = Date.now();
+            const durationHours = Math.max(1, Math.ceil((exitTime - entryTime) / (1000 * 60 * 60)));
+            const hourlyRate = type === 'Automóvil' ? 4000 : 2000;
+            const totalFee = durationHours * hourlyRate;
+
+            if (confirm(`Liquidación de Salida:\nTiempo: ${durationHours} Hora(s)\nTotal a Pagar: $${totalFee.toLocaleString('es-CO')} COP\n\n¿Confirmar salida del vehículo?`)) {
+                // Update vehicle record
+                update(ref(db, `vehicles/${vehicleId}`), {
+                    exitTime,
+                    totalFee,
+                    status: 'finalizado'
+                });
+
+                // Free up Bay
+                update(ref(db, `parking_bays/${bayId}`), {
+                    status: 'disponible',
+                    plate: null,
+                    vehicleId: null
+                });
             }
         };
 
-        // Función para Cerrar Sesión en Firebase
-        window.logoutUser = async function() {
+        // Auth Functions
+        window.openAuthModal = () => document.getElementById('authModal').classList.remove('hidden'), document.getElementById('authModal').classList.add('flex');
+        window.closeAuthModal = () => document.getElementById('authModal').classList.add('hidden'), document.getElementById('authModal').classList.remove('flex');
+
+        window.handleLogin = async () => {
+            const userVal = document.getElementById('authUserIdentifier').value.trim();
+            const pass = document.getElementById('authPassword').value;
+            const email = userVal.includes('@') ? userVal : `${userVal}@parqueadero.local`;
+
             try {
-                await signOut(auth);
-                showNotification('Sesión cerrada', 'Has cerrado sesión correctamente de Firebase Auth.');
-            } catch (error) {
-                console.error("Error al cerrar sesión:", error);
-                showNotification('Error', 'Ocurrió un problema al cerrar la sesión.', 'error');
-            }
-        };
-
-        // Traductor de Errores Comunes de Firebase a Español
-        function getFirebaseErrorMessage(errorCode) {
-            switch (errorCode) {
-                case 'auth/email-already-in-use':
-                    return 'Este correo electrónico ya está registrado. Intenta iniciar sesión.';
-                case 'auth/invalid-email':
-                    return 'El correo electrónico ingresado no es válido.';
-                case 'auth/operation-not-allowed':
-                    return 'El inicio de sesión por correo y contraseña no está habilitado en Firebase Console.';
-                case 'auth/weak-password':
-                    return 'La contraseña es muy débil. Debe tener al menos 6 caracteres.';
-                case 'auth/user-disabled':
-                    return 'Esta cuenta ha sido deshabilitada.';
-                case 'auth/user-not-found':
-                case 'auth/wrong-password':
-                case 'auth/invalid-credential':
-                    return 'Correo o contraseña incorrectos. Verifica tus credenciales.';
-                case 'auth/too-many-requests':
-                    return 'Demasiados intentos fallidos. Inténtalo de nuevo más tarde.';
-                default:
-                    return 'Ocurrió un error con Firebase Auth. Intenta de nuevo.';
-            }
-        }
-
-        // Modificar UI al estar autenticado
-        function setUserAuthenticatedUI(user) {
-            const initials = user.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
-
-            // Desktop UI
-            document.getElementById('auth-buttons-desktop').classList.add('hidden');
-            document.getElementById('user-menu-desktop').classList.remove('hidden');
-            document.getElementById('user-display-name').textContent = user.name;
-            document.getElementById('user-dropdown-email').textContent = user.email;
-            document.getElementById('user-avatar-initials').textContent = initials;
-
-            // Mobile UI
-            document.getElementById('auth-buttons-mobile').classList.add('hidden');
-            document.getElementById('user-menu-mobile').classList.remove('hidden');
-            document.getElementById('user-name-mobile').textContent = user.name;
-            document.getElementById('user-email-mobile').textContent = user.email;
-            document.getElementById('user-avatar-mobile').textContent = initials;
-        }
-
-        // Modificar UI al cerrar sesión
-        function setUserLoggedOutUI() {
-            // Desktop UI
-            document.getElementById('auth-buttons-desktop').classList.remove('hidden');
-            document.getElementById('user-menu-desktop').classList.add('hidden');
-            const dropdown = document.getElementById('user-dropdown');
-            if (dropdown) dropdown.classList.add('hidden');
-
-            // Mobile UI
-            document.getElementById('auth-buttons-mobile').classList.remove('hidden');
-            document.getElementById('user-menu-mobile').classList.add('hidden');
-        }
-
-        function setLoadingButton(btn, isLoading, defaultText) {
-            if (isLoading) {
-                btn.disabled = true;
-                btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i> ${defaultText}`;
-            } else {
-                btn.disabled = false;
-                btn.innerHTML = `<span>${defaultText}</span> <i class="fa-solid fa-arrow-right text-xs"></i>`;
-            }
-        }
-    </script>
-
-    <!-- Navegación -->
-    <nav id="navbar" class="fixed top-0 left-0 w-full z-40 transition-all duration-300 bg-santander-emerald/95 backdrop-blur-md text-white shadow-md">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-20">
-                <a href="#" class="flex items-center space-x-3 group">
-                    <div class="w-10 h-10 rounded-full bg-santander-gold flex items-center justify-center text-white font-bold text-xl shadow-md group-hover:scale-105 transition-transform">
-                        <i class="fa-solid font-bold text-white text-lg">B</i>
-                    </div>
-                    <span class="font-heading text-xl font-bold tracking-wide">Bucaramanga</span>
-                </a>
-                
-                <div class="hidden md:flex space-x-8 font-medium text-sm">
-                    <a href="#acerca" class="hover:text-santander-goldlight transition-colors py-2">Acerca de</a>
-                    <a href="#atracciones" class="hover:text-santander-goldlight transition-colors py-2">Atracciones</a>
-                    <a href="#explora" class="hover:text-santander-goldlight transition-colors py-2">Explorar</a>
-                    <a href="#gastronomia" class="hover:text-santander-goldlight transition-colors py-2">Gastronomía</a>
-                    <a href="#galeria" class="hover:text-santander-goldlight transition-colors py-2">Galería</a>
-                </div>
-
-                <!-- Botones / Estado de Usuario (Desktop) -->
-                <div class="hidden md:flex items-center space-x-4">
-                    <!-- Estado Desconectado -->
-                    <div id="auth-buttons-desktop" class="flex items-center space-x-3">
-                        <button onclick="openAuthModal('login')" class="text-white hover:text-santander-goldlight font-semibold text-sm px-4 py-2 transition-colors">
-                            <i class="fa-solid fa-right-to-bracket mr-1.5"></i>Iniciar Sesión
-                        </button>
-                        <button onclick="openAuthModal('register')" class="bg-santander-gold hover:bg-santander-goldlight text-white px-5 py-2.5 rounded-full font-semibold text-sm transition-all shadow-lg hover:shadow-orange-500/30 transform hover:-translate-y-0.5">
-                            Registrarse
-                        </button>
-                    </div>
-
-                    <!-- Estado Autenticado (Oculto por defecto) -->
-                    <div id="user-menu-desktop" class="hidden relative">
-                        <button id="user-menu-btn" class="flex items-center space-x-3 bg-white/10 hover:bg-white/20 border border-white/20 px-3 py-1.5 rounded-full transition-all focus:outline-none">
-                            <div id="user-avatar-initials" class="w-8 h-8 rounded-full bg-santander-gold text-white font-bold flex items-center justify-center text-sm shadow">
-                                JS
-                            </div>
-                            <span id="user-display-name" class="font-semibold text-sm max-w-[120px] truncate">Juan Silva</span>
-                            <i class="fa-solid fa-chevron-down text-xs text-slate-300"></i>
-                        </button>
-
-                        <!-- Menú Desplegable Usuario -->
-                        <div id="user-dropdown" class="hidden absolute right-0 mt-3 w-56 bg-white text-slate-800 rounded-2xl shadow-2xl border border-slate-100 py-2 z-50 animate-fade-in">
-                            <div class="px-4 py-3 border-b border-slate-100">
-                                <p class="text-xs text-slate-400 font-medium">Sesión iniciada como</p>
-                                <p id="user-dropdown-email" class="text-xs font-bold text-slate-800 truncate">usuario@ejemplo.com</p>
-                            </div>
-                            <a href="#" onclick="showNotification('Próximamente: Panel de perfil de usuario'); return false;" class="flex items-center px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
-                                <i class="fa-solid fa-user text-santander-emerald w-5 mr-2"></i> Mi Perfil
-                            </a>
-                            <a href="#" onclick="showNotification('Tus sitios guardados se mostrarán aquí'); return false;" class="flex items-center px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
-                                <i class="fa-solid fa-bookmark text-santander-gold w-5 mr-2"></i> Favoritos
-                            </a>
-                            <div class="border-t border-slate-100 my-1"></div>
-                            <button onclick="logoutUser()" class="w-full text-left flex items-center px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors">
-                                <i class="fa-solid fa-arrow-right-from-bracket w-5 mr-2"></i> Cerrar Sesión
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Botón Menú Móvil -->
-                <div class="md:hidden flex items-center">
-                    <button id="mobile-menu-btn" class="text-white focus:outline-none p-2">
-                        <i class="fa-solid fa-bars text-2xl"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Menú Desplegable Móvil -->
-        <div id="mobile-menu" class="hidden md:hidden bg-santander-emerald border-t border-santander-emerald/50 px-4 pt-2 pb-6 space-y-3">
-            <a href="#acerca" class="block py-2 text-white hover:text-santander-goldlight font-medium border-b border-white/10">Acerca de</a>
-            <a href="#atracciones" class="block py-2 text-white hover:text-santander-goldlight font-medium border-b border-white/10">Atracciones</a>
-            <a href="#explora" class="block py-2 text-white hover:text-santander-goldlight font-medium border-b border-white/10">Explorar</a>
-            <a href="#gastronomia" class="block py-2 text-white hover:text-santander-goldlight font-medium border-b border-white/10">Gastronomía</a>
-            <a href="#galeria" class="block py-2 text-white hover:text-santander-goldlight font-medium border-b border-white/10">Galería</a>
-            
-            <div id="auth-buttons-mobile" class="pt-2 space-y-2">
-                <button onclick="openAuthModal('login'); document.getElementById('mobile-menu').classList.add('hidden');" class="block w-full text-center border border-white/30 text-white font-semibold py-2.5 rounded-xl">Iniciar Sesión</button>
-                <button onclick="openAuthModal('register'); document.getElementById('mobile-menu').classList.add('hidden');" class="block w-full text-center bg-santander-gold text-white font-semibold py-2.5 rounded-xl">Registrarse</button>
-            </div>
-
-            <div id="user-menu-mobile" class="hidden pt-3 border-t border-white/20">
-                <div class="flex items-center space-x-3 mb-3 px-2">
-                    <div id="user-avatar-mobile" class="w-9 h-9 rounded-full bg-santander-gold text-white font-bold flex items-center justify-center text-sm">
-                        JS
-                    </div>
-                    <div>
-                        <p id="user-name-mobile" class="font-bold text-white text-sm">Juan Silva</p>
-                        <p id="user-email-mobile" class="text-xs text-slate-300">juan@ejemplo.com</p>
-                    </div>
-                </div>
-                <button onclick="logoutUser(); document.getElementById('mobile-menu').classList.add('hidden');" class="block w-full text-center bg-red-600/80 hover:bg-red-600 text-white font-semibold py-2.5 rounded-xl">
-                    <i class="fa-solid fa-right-from-bracket mr-2"></i> Cerrar Sesión
-                </button>
-            </div>
-        </div>
-    </nav>
-
-    <!-- Notificación Flotante de Sistema -->
-    <div id="toast-notification" class="fixed top-24 right-4 z-50 transform translate-x-full transition-transform duration-300 max-w-sm bg-slate-900 text-white p-4 rounded-2xl shadow-2xl border border-slate-700 flex items-center space-x-3">
-        <div id="toast-icon-bg" class="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
-            <i id="toast-icon" class="fa-solid fa-circle-check text-lg"></i>
-        </div>
-        <div>
-            <h5 id="toast-title" class="font-bold text-sm text-white">¡Éxito!</h5>
-            <p id="toast-message" class="text-xs text-slate-300">Sesión iniciada correctamente.</p>
-        </div>
-    </div>
-
-    <!-- Hero Section -->
-    <header class="hero-gradient min-h-screen flex items-center justify-center relative text-white pt-20 px-4">
-        <div class="max-w-4xl mx-auto text-center space-y-6 animate-fade-in">
-            <div class="inline-flex items-center space-x-2 bg-santander-gold/30 border border-santander-goldlight/40 backdrop-blur-md px-4 py-1.5 rounded-full text-santander-sand text-sm font-medium">
-                <i class="fa-solid fa-tree"></i>
-                <span>Capital del departamento de Santander</span>
-            </div>
-            
-            <h1 class="text-4xl sm:text-6xl md:text-7xl font-extrabold tracking-tight leading-tight">
-                Bucaramanga <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-yellow-400 to-amber-500">La Ciudad Bonita</span>
-            </h1>
-            
-            <p class="text-lg sm:text-xl text-slate-200 max-w-2xl mx-auto font-light leading-relaxed">
-                Descubre la ciudad de los parques, su vibrante cultura, paisajes imponentes entre montañas y una gastronomía llena de tradición y orgullo santanderino.
-            </p>
-
-            <div class="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-                <a href="#atracciones" class="w-full sm:w-auto bg-santander-gold hover:bg-santander-goldlight text-white font-bold px-8 py-4 rounded-full transition-all shadow-xl hover:shadow-amber-500/40 transform hover:-translate-y-1 flex items-center justify-center space-x-2">
-                    <span>Descubrir Atracciones</span>
-                    <i class="fa-solid fa-arrow-right"></i>
-                </a>
-                <a href="#acerca" class="w-full sm:w-auto bg-white/10 hover:bg-white/20 border border-white/30 backdrop-blur-md text-white font-semibold px-8 py-4 rounded-full transition-all flex items-center justify-center space-x-2">
-                    <i class="fa-solid fa-circle-info"></i>
-                    <span>Datos Clave</span>
-                </a>
-            </div>
-        </div>
-
-        <!-- Indicador de scroll -->
-        <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-center animate-bounce">
-            <a href="#acerca" class="text-white/70 hover:text-white transition-colors">
-                <i class="fa-solid fa-chevron-down text-2xl"></i>
-            </a>
-        </div>
-    </header>
-
-    <!-- Sección Datos Clave -->
-    <section id="acerca" class="py-20 bg-white">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center max-w-3xl mx-auto mb-16">
-                <h2 class="text-santander-gold font-bold text-sm tracking-widest uppercase mb-2">Conoce Bucaramanga</h2>
-                <h3 class="text-3xl sm:text-4xl font-extrabold text-slate-900">La Ciudad de los Parques</h3>
-                <p class="mt-4 text-slate-600">Rodeada por la Cordillera Oriental de los Andes, Bucaramanga destaca por su próspera economía, más de 160 parques urbanos y un clima primaveral constante.</p>
-            </div>
-
-            <!-- Grilla de Estadísticas -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                <!-- Clima -->
-                <div class="p-8 rounded-2xl bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-100/80 shadow-sm hover:shadow-md transition-shadow group">
-                    <div class="w-14 h-14 rounded-xl bg-amber-500/10 text-santander-gold flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition-transform">
-                        <i class="fa-solid fa-sun"></i>
-                    </div>
-                    <h4 class="text-xl font-bold text-slate-800 mb-1">23°C Promedio</h4>
-                    <span class="text-xs font-semibold text-amber-600 bg-amber-100 px-2.5 py-1 rounded-full uppercase tracking-wider">Clima Cálido Templado</span>
-                    <p class="text-slate-600 text-sm mt-3">Un clima agradable todo el año perfecto para recorrer sus calles y zonas verdes.</p>
-                </div>
-
-                <!-- Población -->
-                <div class="p-8 rounded-2xl bg-gradient-to-br from-emerald-50 to-green-50 border border-emerald-100/80 shadow-sm hover:shadow-md transition-shadow group">
-                    <div class="w-14 h-14 rounded-xl bg-emerald-500/10 text-santander-emerald flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition-transform">
-                        <i class="fa-solid fa-users"></i>
-                    </div>
-                    <h4 class="text-xl font-bold text-slate-800 mb-1">+600,000 Hab.</h4>
-                    <span class="text-xs font-semibold text-emerald-700 bg-emerald-100 px-2.5 py-1 rounded-full uppercase tracking-wider">Área Metropol: ~1.2M</span>
-                    <p class="text-slate-600 text-sm mt-3">Quinta área metropolitana más poblada e importante de Colombia.</p>
-                </div>
-
-                <!-- Altitud -->
-                <div class="p-8 rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100/80 shadow-sm hover:shadow-md transition-shadow group">
-                    <div class="w-14 h-14 rounded-xl bg-blue-500/10 text-blue-600 flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition-transform">
-                        <i class="fa-solid fa-mountain"></i>
-                    </div>
-                    <h4 class="text-xl font-bold text-slate-800 mb-1">959 m s. n. m.</h4>
-                    <span class="text-xs font-semibold text-blue-600 bg-blue-100 px-2.5 py-1 rounded-full uppercase tracking-wider">Meseta Bucaramanga</span>
-                    <p class="text-slate-600 text-sm mt-3">Ubicada estratégicamente sobre una meseta con vista al imponente cañón.</p>
-                </div>
-
-                <!-- Gentilicio -->
-                <div class="p-8 rounded-2xl bg-gradient-to-br from-stone-50 to-amber-50 border border-stone-200/80 shadow-sm hover:shadow-md transition-shadow group">
-                    <div class="w-14 h-14 rounded-xl bg-santander-earth/10 text-santander-earth flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition-transform">
-                        <i class="fa-solid fa-heart"></i>
-                    </div>
-                    <h4 class="text-xl font-bold text-slate-800 mb-1">Bumangués / a</h4>
-                    <span class="text-xs font-semibold text-amber-800 bg-amber-100 px-2.5 py-1 rounded-full uppercase tracking-wider">Gente Franca y Cálida</span>
-                    <p class="text-slate-600 text-sm mt-3">Reconocidos por su carácter pujante, hospitalidad y espíritu trabajador.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Sección Atracciones Principales -->
-    <section id="atracciones" class="py-20 bg-slate-100">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex flex-col md:flex-row md:items-end justify-between mb-12">
-                <div>
-                    <h2 class="text-santander-gold font-bold text-sm tracking-widest uppercase mb-2">Destinos Imperdibles</h2>
-                    <h3 class="text-3xl sm:text-4xl font-extrabold text-slate-900">Atracciones Principales</h3>
-                </div>
-                <p class="text-slate-600 max-w-md mt-4 md:mt-0">
-                    Desde maravillas naturales de talla mundial hasta joyas de la arquitectura colonial e histórica.
-                </p>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <!-- Panachi -->
-                <div class="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 flex flex-col group">
-                    <div class="relative h-56 overflow-hidden">
-                        <img src="https://images.unsplash.com/photo-1596422846543-75c6fc197f07?auto=format&fit=crop&q=80&w=800" alt="Cañón del Chicamocha" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" onerror="this.src='https://placehold.co/800x600/15803d/ffffff?text=Chicamocha'">
-                        <span class="absolute top-4 left-4 bg-santander-gold text-white text-xs font-bold px-3 py-1 rounded-full shadow-md">Imperdible</span>
-                    </div>
-                    <div class="p-6 flex-1 flex flex-col justify-between">
-                        <div>
-                            <h4 class="text-xl font-bold text-slate-900 mb-2">Parque Panachi & Cañón del Chicamocha</h4>
-                            <p class="text-slate-600 text-sm">Uno de los cañones más profundos del mundo. Cuenta con uno de los teleféricos más largos del planeta y atracciones extremas.</p>
-                        </div>
-                        <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-                            <span><i class="fa-solid fa-location-dot text-santander-gold mr-1"></i> A 1.5 horas</span>
-                            <span><i class="fa-solid fa-mountain mr-1"></i> Naturaleza & Aventura</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Parque San Pío -->
-                <div class="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 flex flex-col group">
-                    <div class="relative h-56 overflow-hidden">
-                        <img src="https://images.unsplash.com/photo-1519331379826-f10be5486c6f?auto=format&fit=crop&q=80&w=800" alt="Parque San Pío" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" onerror="this.src='https://placehold.co/800x600/0c5c36/ffffff?text=Parque+San+Pio'">
-                        <span class="absolute top-4 left-4 bg-santander-emerald text-white text-xs font-bold px-3 py-1 rounded-full shadow-md">Urbano</span>
-                    </div>
-                    <div class="p-6 flex-1 flex flex-col justify-between">
-                        <div>
-                            <h4 class="text-xl font-bold text-slate-900 mb-2">Parque San Pío</h4>
-                            <p class="text-slate-600 text-sm">Ubicado en el exclusivo sector de Cabecera, alberga la famosa escultura "La Mujer de Pie" (La Gorda) regalada por el maestro Fernando Botero.</p>
-                        </div>
-                        <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-                            <span><i class="fa-solid fa-location-dot text-santander-gold mr-1"></i> Cabecera del Llano</span>
-                            <span><i class="fa-solid fa-tree mr-1"></i> Arte & Parques</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Parque del Agua -->
-                <div class="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 flex flex-col group">
-                    <div class="relative h-56 overflow-hidden">
-                        <img src="https://images.unsplash.com/photo-1517649763962-0c623266010b?auto=format&fit=crop&q=80&w=800" alt="Parque del Agua" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" onerror="this.src='https://placehold.co/800x600/0284c7/ffffff?text=Parque+del+Agua'">
-                        <span class="absolute top-4 left-4 bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md">Ecológico</span>
-                    </div>
-                    <div class="p-6 flex-1 flex flex-col justify-between">
-                        <div>
-                            <h4 class="text-xl font-bold text-slate-900 mb-2">Parque del Agua</h4>
-                            <p class="text-slate-600 text-sm">Un bello recinto ecológico con senderos, cascadas, fuentes interactivas y jardines. Famoso por su increíble alumbrado en temporada navideña.</p>
-                        </div>
-                        <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-                            <span><i class="fa-solid fa-location-dot text-santander-gold mr-1"></i> Av. Quebradaseca</span>
-                            <span><i class="fa-solid fa-droplet mr-1"></i> Naturaleza</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Catedral Sagrada Familia -->
-                <div class="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 flex flex-col group">
-                    <div class="relative h-56 overflow-hidden">
-                        <img src="https://images.unsplash.com/photo-1548625361-18544f803b0c?auto=format&fit=crop&q=80&w=800" alt="Catedral Sagrada Familia" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" onerror="this.src='https://placehold.co/800x600/78350f/ffffff?text=Catedral'">
-                        <span class="absolute top-4 left-4 bg-santander-earth text-white text-xs font-bold px-3 py-1 rounded-full shadow-md">Histórico</span>
-                    </div>
-                    <div class="p-6 flex-1 flex flex-col justify-between">
-                        <div>
-                            <h4 class="text-xl font-bold text-slate-900 mb-2">Catedral de la Sagrada Familia</h4>
-                            <p class="text-slate-600 text-sm">Imponente templo católico frente al Parque Santander. Con su icónica cúpula de ladrillo y vitrales artísticos en el centro histórico.</p>
-                        </div>
-                        <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-                            <span><i class="fa-solid fa-location-dot text-santander-gold mr-1"></i> Centro de la Ciudad</span>
-                            <span><i class="fa-solid fa-church mr-1"></i> Patrimonio</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Mercado Central / Mercado Guarin -->
-                <div class="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 flex flex-col group">
-                    <div class="relative h-56 overflow-hidden">
-                        <img src="https://images.unsplash.com/photo-1533900298318-6b8da08a523e?auto=format&fit=crop&q=80&w=800" alt="Plaza de Mercado" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" onerror="this.src='https://placehold.co/800x600/d97706/ffffff?text=Mercado+Guarin'">
-                        <span class="absolute top-4 left-4 bg-amber-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md">Tradición</span>
-                    </div>
-                    <div class="p-6 flex-1 flex flex-col justify-between">
-                        <div>
-                            <h4 class="text-xl font-bold text-slate-900 mb-2">Mercado Central & Plaza Guarín</h4>
-                            <p class="text-slate-600 text-sm">El alma viva de la gastronomía santanderina. Frutas exóticas, hierbas, jugos frescos y los verdaderos sabores autóctonos de la región.</p>
-                        </div>
-                        <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-                            <span><i class="fa-solid fa-location-dot text-santander-gold mr-1"></i> Zona Centro</span>
-                            <span><i class="fa-solid fa-utensils mr-1"></i> Cultura Gastronómica</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Cristo del Santísimo -->
-                <div class="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 flex flex-col group">
-                    <div class="relative h-56 overflow-hidden">
-                        <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&q=80&w=800" alt="Ecoparque El Santísimo" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" onerror="this.src='https://placehold.co/800x600/15803d/ffffff?text=El+Santisimo'">
-                        <span class="absolute top-4 left-4 bg-santander-emerald text-white text-xs font-bold px-3 py-1 rounded-full shadow-md">Mirador</span>
-                    </div>
-                    <div class="p-6 flex-1 flex flex-col justify-between">
-                        <div>
-                            <h4 class="text-xl font-bold text-slate-900 mb-2">Ecoparque El Santísimo</h4>
-                            <p class="text-slate-600 text-sm">Ubicado en Floridablanca (área metropolitana), posee una escultura monumental de 38 metros y el mejor mirador panorámico de la ciudad.</p>
-                        </div>
-                        <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-                            <span><i class="fa-solid fa-location-dot text-santander-gold mr-1"></i> Floridablanca</span>
-                            <span><i class="fa-solid fa-eye mr-1"></i> Panorama & Show</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Sección Explorar por Categorías (Filtros Interactivos) -->
-    <section id="explora" class="py-20 bg-white">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center max-w-3xl mx-auto mb-12">
-                <h2 class="text-santander-gold font-bold text-sm tracking-widest uppercase mb-2">Guía Temática</h2>
-                <h3 class="text-3xl sm:text-4xl font-extrabold text-slate-900">Explora la Ciudad a tu Manera</h3>
-                <p class="mt-3 text-slate-600">Filtra y encuentra las experiencias ideales según tu tipo de viaje.</p>
-
-                <!-- Botones de Filtro -->
-                <div class="flex flex-wrap justify-center gap-2 sm:gap-4 mt-8">
-                    <button onclick="filterPlaces('todos')" class="filter-btn active bg-santander-emerald text-white px-6 py-2.5 rounded-full font-medium text-sm transition-all shadow-md">Todos</button>
-                    <button onclick="filterPlaces('naturaleza')" class="filter-btn bg-slate-100 hover:bg-slate-200 text-slate-700 px-6 py-2.5 rounded-full font-medium text-sm transition-all">Naturaleza</button>
-                    <button onclick="filterPlaces('cultura')" class="filter-btn bg-slate-100 hover:bg-slate-200 text-slate-700 px-6 py-2.5 rounded-full font-medium text-sm transition-all">Cultura & Historia</button>
-                    <button onclick="filterPlaces('nocturna')" class="filter-btn bg-slate-100 hover:bg-slate-200 text-slate-700 px-6 py-2.5 rounded-full font-medium text-sm transition-all">Vida Nocturna</button>
-                </div>
-            </div>
-
-            <!-- Grilla Dinámica de Lugares -->
-            <div id="places-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                <!-- Tarjeta 1 - Naturaleza -->
-                <div class="place-card naturaleza bg-slate-50 border border-slate-200 rounded-2xl p-6 hover:border-santander-emerald transition-all duration-300 hover:shadow-lg">
-                    <div class="flex items-center space-x-4 mb-4">
-                        <div class="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-xl shrink-0">
-                            <i class="fa-solid fa-leaf"></i>
-                        </div>
-                        <div>
-                            <h4 class="font-bold text-slate-900">Jardín Botánico Eloy Valenzuela</h4>
-                            <span class="text-xs text-emerald-700 font-semibold bg-emerald-100 px-2 py-0.5 rounded">Naturaleza</span>
-                        </div>
-                    </div>
-                    <p class="text-slate-600 text-sm mb-4">Un oasis de biodiversidad en Floridablanca con más de 800 especies de plantas, mariposario y senderos rodeados de palmeras.</p>
-                    <button onclick="openModal('Jardín Botánico', 'Ubicado en Floridablanca, cuenta con 7.5 hectáreas dedicadas a la flora autóctona, quebradas naturales y avistamiento de aves tropicales como oropéndolas y colibríes.')" class="text-santander-emerald font-semibold text-sm hover:underline inline-flex items-center">
-                        Más información <i class="fa-solid fa-chevron-right text-xs ml-1"></i>
-                    </button>
-                </div>
-
-                <!-- Tarjeta 2 - Cultura -->
-                <div class="place-card cultura bg-slate-50 border border-slate-200 rounded-2xl p-6 hover:border-santander-emerald transition-all duration-300 hover:shadow-lg">
-                    <div class="flex items-center space-x-4 mb-4">
-                        <div class="w-12 h-12 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center text-xl shrink-0">
-                            <i class="fa-solid fa-landmark"></i>
-                        </div>
-                        <div>
-                            <h4 class="font-bold text-slate-900">Casa de Bolívar</h4>
-                            <span class="text-xs text-amber-700 font-semibold bg-amber-100 px-2 py-0.5 rounded">Cultura</span>
-                        </div>
-                    </div>
-                    <p class="text-slate-600 text-sm mb-4">Casona colonial del siglo XVIII donde residió el Libertador Simón Bolívar durante dos meses en 1828. Hoy es el Museo de Historia de Santander.</p>
-                    <button onclick="openModal('Casa de Bolívar', 'Alberga colecciones precolombinas Guane, elementos coloniales, manuscritos históricos y armas de la época de la independencia.')" class="text-santander-emerald font-semibold text-sm hover:underline inline-flex items-center">
-                        Más información <i class="fa-solid fa-chevron-right text-xs ml-1"></i>
-                    </button>
-                </div>
-
-                <!-- Tarjeta 3 - Nocturna -->
-                <div class="place-card nocturna bg-slate-50 border border-slate-200 rounded-2xl p-6 hover:border-santander-emerald transition-all duration-300 hover:shadow-lg">
-                    <div class="flex items-center space-x-4 mb-4">
-                        <div class="w-12 h-12 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center text-xl shrink-0">
-                            <i class="fa-solid fa-martini-glass-citrus"></i>
-                        </div>
-                        <div>
-                            <h4 class="font-bold text-slate-900">Zona Rosa de Cabecera</h4>
-                            <span class="text-xs text-purple-700 font-semibold bg-purple-100 px-2 py-0.5 rounded">Vida Nocturna</span>
-                        </div>
-                    </div>
-                    <p class="text-slate-600 text-sm mb-4">El epicentro del entretenimiento nocturno con restaurantes de alta cocina, gastro-bars, terrazas modernas y discotecas elegantes.</p>
-                    <button onclick="openModal('Zona Rosa Cabecera', 'Las calles 48 a 52 y carreras 33 a 36 reúnen los mejores bares de coctelería de autor, música en vivo y una excelente oferta gastronómica nocturna.')" class="text-santander-emerald font-semibold text-sm hover:underline inline-flex items-center">
-                        Más información <i class="fa-solid fa-chevron-right text-xs ml-1"></i>
-                    </button>
-                </div>
-
-                <!-- Tarjeta 4 - Naturaleza -->
-                <div class="place-card naturaleza bg-slate-50 border border-slate-200 rounded-2xl p-6 hover:border-santander-emerald transition-all duration-300 hover:shadow-lg">
-                    <div class="flex items-center space-x-4 mb-4">
-                        <div class="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-xl shrink-0">
-                            <i class="fa-solid fa-compass-drafting"></i>
-                        </div>
-                        <div>
-                            <h4 class="font-bold text-slate-900">Mesa de los Santos</h4>
-                            <span class="text-xs text-emerald-700 font-semibold bg-emerald-100 px-2 py-0.5 rounded">Naturaleza</span>
-                        </div>
-                    </div>
-                    <p class="text-slate-600 text-sm mb-4">Meseta de clima templado perfecta para deportes al aire libre, mercados campesinos, restaurantes típicos y cata de café orgánico.</p>
-                    <button onclick="openModal('Mesa de los Santos', 'Ubicada a solo 45 minutos. Es famosa por tener la estación superior del teleférico de Panachi, fincas cafeteras históricas como Hacienda El Roble y clima idóneo de 18°C.')" class="text-santander-emerald font-semibold text-sm hover:underline inline-flex items-center">
-                        Más información <i class="fa-solid fa-chevron-right text-xs ml-1"></i>
-                    </button>
-                </div>
-
-                <!-- Tarjeta 5 - Cultura -->
-                <div class="place-card cultura bg-slate-50 border border-slate-200 rounded-2xl p-6 hover:border-santander-emerald transition-all duration-300 hover:shadow-lg">
-                    <div class="flex items-center space-x-4 mb-4">
-                        <div class="w-12 h-12 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center text-xl shrink-0">
-                            <i class="fa-solid fa-masks-theater"></i>
-                        </div>
-                        <div>
-                            <h4 class="font-bold text-slate-900">Teatro Santander</h4>
-                            <span class="text-xs text-amber-700 font-semibold bg-amber-100 px-2 py-0.5 rounded">Cultura</span>
-                        </div>
-                    </div>
-                    <p class="text-slate-600 text-sm mb-4">Un templo de las artes escénicas hermosamente restaurado con acústica de nivel mundial para ópera, conciertos, danza y teatro.</p>
-                    <button onclick="openModal('Teatro Santander', 'Joyero arquitectónico del centro de la ciudad restaurado recientemente. Cuenta con programación permanente de artistas locales e internacionales.')" class="text-santander-emerald font-semibold text-sm hover:underline inline-flex items-center">
-                        Más información <i class="fa-solid fa-chevron-right text-xs ml-1"></i>
-                    </button>
-                </div>
-
-                <!-- Tarjeta 6 - Nocturna -->
-                <div class="place-card nocturna bg-slate-50 border border-slate-200 rounded-2xl p-6 hover:border-santander-emerald transition-all duration-300 hover:shadow-lg">
-                    <div class="flex items-center space-x-4 mb-4">
-                        <div class="w-12 h-12 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center text-xl shrink-0">
-                            <i class="fa-solid fa-beer-mug-empty"></i>
-                        </div>
-                        <div>
-                            <h4 class="font-bold text-slate-900">Bulevar de la 48</h4>
-                            <span class="text-xs text-purple-700 font-semibold bg-purple-100 px-2 py-0.5 rounded">Vida Nocturna</span>
-                        </div>
-                    </div>
-                    <p class="text-slate-600 text-sm mb-4">Corredor peatonal y gastronómico perfecto para tarde de cervezas artesanales locales, charlas al aire libre y comida de autor.</p>
-                    <button onclick="openModal('Bulevar de la 48', 'Un punto de encuentro clásico donde convergen jóvenes y familias para disfrutar de la refrescante brisa de la noche santanderina.')" class="text-santander-emerald font-semibold text-sm hover:underline inline-flex items-center">
-                        Más información <i class="fa-solid fa-chevron-right text-xs ml-1"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Sección Gastronomía Santanderina -->
-    <section id="gastronomia" class="py-20 bg-santander-dark text-white relative overflow-hidden">
-        <!-- Decoraciones de fondo -->
-        <div class="absolute -right-20 -top-20 w-80 h-80 bg-santander-gold/10 rounded-full blur-3xl pointer-events-none"></div>
-        <div class="absolute -left-20 -bottom-20 w-80 h-80 bg-santander-emerald/20 rounded-full blur-3xl pointer-events-none"></div>
-
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-            <div class="text-center max-w-3xl mx-auto mb-16">
-                <h2 class="text-santander-goldlight font-bold text-sm tracking-widest uppercase mb-2">Sabores Tradicionales</h2>
-                <h3 class="text-3xl sm:text-4xl font-extrabold">Gastronomía Santanderina</h3>
-                <p class="mt-4 text-slate-300">La cocina de Santander es una experiencia única en Colombia, caracterizada por sabores intensos, autóctonos e historias culinarias ancestrales.</p>
-            </div>
-
-            <!-- Grilla de Platos Típicos -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <!-- Pepitoria -->
-                <div class="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-6 hover:border-santander-gold transition-all duration-300 group">
-                    <div class="flex items-center space-x-4 mb-4">
-                        <div class="w-12 h-12 rounded-xl bg-amber-500/20 text-santander-goldlight flex items-center justify-center text-xl shrink-0 group-hover:scale-110 transition-transform">
-                            <i class="fa-solid fa-bowl-food"></i>
-                        </div>
-                        <h4 class="text-xl font-bold">Pepitoria Santanderina</h4>
-                    </div>
-                    <p class="text-slate-300 text-sm leading-relaxed mb-4">
-                        Plato autóctono preparado a base de asadura de cabro, arroz, huevo duro, queso, arvejas y especias tradicionales. Servido comúnmente como acompañamiento principal.
-                    </p>
-                    <span class="inline-block text-xs font-semibold text-amber-300 bg-amber-900/40 border border-amber-700/40 px-3 py-1 rounded-full">Sabor Tradicional</span>
-                </div>
-
-                <!-- Carne Oreada -->
-                <div class="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-6 hover:border-santander-gold transition-all duration-300 group">
-                    <div class="flex items-center space-x-4 mb-4">
-                        <div class="w-12 h-12 rounded-xl bg-amber-500/20 text-santander-goldlight flex items-center justify-center text-xl shrink-0 group-hover:scale-110 transition-transform">
-                            <i class="fa-solid fa-drumstick-bite"></i>
-                        </div>
-                        <h4 class="text-xl font-bold">Carne Oreada</h4>
-                    </div>
-                    <p class="text-slate-300 text-sm leading-relaxed mb-4">
-                        Corte delgadito de carne de res marinada en especias, panela y cerveza, luego secada al sol y al viento. Se sirve asada al carbón acompañada de yuca y guacamole.
-                    </p>
-                    <span class="inline-block text-xs font-semibold text-amber-300 bg-amber-900/40 border border-amber-700/40 px-3 py-1 rounded-full">Técnica Ancestral</span>
-                </div>
-
-                <!-- Arepa Santanderina -->
-                <div class="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-6 hover:border-santander-gold transition-all duration-300 group">
-                    <div class="flex items-center space-x-4 mb-4">
-                        <div class="w-12 h-12 rounded-xl bg-amber-500/20 text-santander-goldlight flex items-center justify-center text-xl shrink-0 group-hover:scale-110 transition-transform">
-                            <i class="fa-solid fa-stroopwafel"></i>
-                        </div>
-                        <h4 class="text-xl font-bold">Arepa Santanderina</h4>
-                    </div>
-                    <p class="text-slate-300 text-sm leading-relaxed mb-4">
-                        Elaborada con maíz pelado en ceniza de leña, chicharrón molido y yuca. Asada a fuego lento en tiesto de barro, ofreciendo un sabor ahumado e inconfundible.
-                    </p>
-                    <span class="inline-block text-xs font-semibold text-amber-300 bg-amber-900/40 border border-amber-700/40 px-3 py-1 rounded-full">Base de la Mesa</span>
-                </div>
-
-                <!-- Mute Santanderino -->
-                <div class="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-6 hover:border-santander-gold transition-all duration-300 group">
-                    <div class="flex items-center space-x-4 mb-4">
-                        <div class="w-12 h-12 rounded-xl bg-amber-500/20 text-santander-goldlight flex items-center justify-center text-xl shrink-0 group-hover:scale-110 transition-transform">
-                            <i class="fa-solid fa-fire-burner"></i>
-                        </div>
-                        <h4 class="text-xl font-bold">Mute Santanderino</h4>
-                    </div>
-                    <p class="text-slate-300 text-sm leading-relaxed mb-4">
-                        Sopa sustanciosa que combina variadas carnes (res, cerdo, tripa), maíz blanco, garbanzos, frijoles, papa, ahuyama y un toque de guiso de cebolla y tomate.
-                    </p>
-                    <span class="inline-block text-xs font-semibold text-amber-300 bg-amber-900/40 border border-amber-700/40 px-3 py-1 rounded-full">Sopa Dominical</span>
-                </div>
-
-                <!-- Hormigas Culonas -->
-                <div class="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-6 hover:border-santander-gold transition-all duration-300 group">
-                    <div class="flex items-center space-x-4 mb-4">
-                        <div class="w-12 h-12 rounded-xl bg-amber-500/20 text-santander-goldlight flex items-center justify-center text-xl shrink-0 group-hover:scale-110 transition-transform">
-                            <i class="fa-solid fa-bug"></i>
-                        </div>
-                        <h4 class="text-xl font-bold">Hormigas Culonas</h4>
-                    </div>
-                    <p class="text-slate-300 text-sm leading-relaxed mb-4">
-                        Manjar de origen indígena Guane. Se tuestan con sal y tienen un textura crujiente con un sabor crocante parecido al fruto seco o al chicharrón.
-                    </p>
-                    <span class="inline-block text-xs font-semibold text-amber-300 bg-amber-900/40 border border-amber-700/40 px-3 py-1 rounded-full">Exoticidad Guane</span>
-                </div>
-
-                <!-- Obleas de Floridablanca -->
-                <div class="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-6 hover:border-santander-gold transition-all duration-300 group">
-                    <div class="flex items-center space-x-4 mb-4">
-                        <div class="w-12 h-12 rounded-xl bg-amber-500/20 text-santander-goldlight flex items-center justify-center text-xl shrink-0 group-hover:scale-110 transition-transform">
-                            <i class="fa-solid fa-cookie"></i>
-                        </div>
-                        <h4 class="text-xl font-bold">Obleas Tradicionales</h4>
-                    </div>
-                    <p class="text-slate-300 text-sm leading-relaxed mb-4">
-                        Postre ícono preparado con galletas finas rellenas de arequipe casero, queso costeño rallado, mermelada de mora, crema de leche y frutas.
-                    </p>
-                    <span class="inline-block text-xs font-semibold text-amber-300 bg-amber-900/40 border border-amber-700/40 px-3 py-1 rounded-full">Postre Típico</span>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Mapa & Guía Rápida -->
-    <section class="py-20 bg-slate-100">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="bg-white rounded-3xl shadow-xl overflow-hidden border border-slate-200 grid grid-cols-1 lg:grid-cols-12">
-                <!-- Info Guía -->
-                <div class="lg:col-span-5 p-8 lg:p-12 flex flex-col justify-between">
-                    <div>
-                        <span class="text-santander-gold font-bold text-xs uppercase tracking-widest">Ubicación Estratégica</span>
-                        <h3 class="text-3xl font-extrabold text-slate-900 mt-2 mb-4">¿Cómo llegar y moverse?</h3>
-                        <p class="text-slate-600 text-sm leading-relaxed mb-6">
-                            Bucaramanga cuenta con el Aeropuerto Internacional Palonegro (BGA) ubicado en el municipio vecino de Lebrija, a solo 30 minutos del centro urbano.
-                        </p>
-                        
-                        <div class="space-y-4">
-                            <div class="flex items-start space-x-3">
-                                <div class="w-8 h-8 rounded-lg bg-emerald-100 text-santander-emerald flex items-center justify-center shrink-0 mt-1">
-                                    <i class="fa-solid fa-plane text-sm"></i>
-                                </div>
-                                <div>
-                                    <h5 class="font-bold text-slate-800 text-sm">Vía Aérea</h5>
-                                    <p class="text-slate-500 text-xs">Conexiones directas diarias con Bogotá, Medellín, Cali y Cartagena.</p>
-                                </div>
-                            </div>
-
-                            <div class="flex items-start space-x-3">
-                                <div class="w-8 h-8 rounded-lg bg-emerald-100 text-santander-emerald flex items-center justify-center shrink-0 mt-1">
-                                    <i class="fa-solid fa-bus text-sm"></i>
-                                </div>
-                                <div>
-                                    <h5 class="font-bold text-slate-800 text-sm">Movilidad Urbana</h5>
-                                    <p class="text-slate-500 text-xs">Sistema Masivo Metrolínea, taxis autorizados y plataformas digitales.</p>
-                                </div>
-                            </div>
-
-                            <div class="flex items-start space-x-3">
-                                <div class="w-8 h-8 rounded-lg bg-emerald-100 text-santander-emerald flex items-center justify-center shrink-0 mt-1">
-                                    <i class="fa-solid fa-shield-halved text-sm"></i>
-                                </div>
-                                <div>
-                                    <h5 class="font-bold text-slate-800 text-sm">Seguridad y Calidad de Vida</h5>
-                                    <p class="text-slate-500 text-xs">Catalogada como una de las ciudades con mejor índice de calidad de vida y seguridad de Colombia.</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="mt-8 pt-6 border-t border-slate-100">
-                        <div class="flex items-center space-x-2 text-xs font-semibold text-slate-500">
-                            <i class="fa-solid fa-compass text-santander-gold"></i>
-                            <span>Coordenadas: 7°07′00″N 73°07′00″O</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Mapa Simulado / Ilustrativo -->
-                <div class="lg:col-span-7 bg-slate-200 relative min-h-[350px] lg:min-h-full">
-                    <iframe class="w-full h-full min-h-[350px] border-0" 
-                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d63321.36551848906!2d-73.1539257!3d7.119349!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8e683f9821a8684d%3A0xb23c7b2a59f5f0b!2sBucaramanga%2C%20Santander!5e0!3m2!1ses!2sco!4v1680000000000!5m2!1ses!2sco" 
-                        allowfullscreen="" 
-                        loading="lazy" 
-                        referrerpolicy="no-referrer-when-downgrade">
-                    </iframe>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Galería Visual -->
-    <section id="galeria" class="py-20 bg-white">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center max-w-3xl mx-auto mb-16">
-                <h2 class="text-santander-gold font-bold text-sm tracking-widest uppercase mb-2">Galería Fotográfica</h2>
-                <h3 class="text-3xl sm:text-4xl font-extrabold text-slate-900">Postales de la Ciudad Bonita</h3>
-                <p class="mt-3 text-slate-600">Un recorrido visual por los atardeceres, parques y paisajes de Bucaramanga.</p>
-            </div>
-
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div class="overflow-hidden rounded-2xl h-64 group shadow-md">
-                    <img src="https://images.unsplash.com/photo-1596422846543-75c6fc197f07?auto=format&fit=crop&q=80&w=600" alt="Vista Cañón" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" onerror="this.src='https://placehold.co/600x600/15803d/ffffff?text=Paisaje+1'">
-                </div>
-                <div class="overflow-hidden rounded-2xl h-64 group shadow-md">
-                    <img src="https://images.unsplash.com/photo-1519331379826-f10be5486c6f?auto=format&fit=crop&q=80&w=600" alt="Parques" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" onerror="this.src='https://placehold.co/600x600/0c5c36/ffffff?text=Paisaje+2'">
-                </div>
-                <div class="overflow-hidden rounded-2xl h-64 group shadow-md">
-                    <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&q=80&w=600" alt="Atardecer" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" onerror="this.src='https://placehold.co/600x600/d97706/ffffff?text=Paisaje+3'">
-                </div>
-                <div class="overflow-hidden rounded-2xl h-64 group shadow-md">
-                    <img src="https://images.unsplash.com/photo-1548625361-18544f803b0c?auto=format&fit=crop&q=80&w=600" alt="Arquitectura" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" onerror="this.src='https://placehold.co/600x600/78350f/ffffff?text=Paisaje+4'">
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Modal Informativo General -->
-    <div id="info-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl relative animate-fade-in">
-            <button onclick="closeModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 p-2">
-                <i class="fa-solid fa-xmark text-xl"></i>
-            </button>
-            <h4 id="modal-title" class="text-2xl font-bold text-slate-900 mb-3"></h4>
-            <p id="modal-desc" class="text-slate-600 text-sm leading-relaxed mb-6"></p>
-            <button onclick="closeModal()" class="w-full bg-santander-emerald text-white font-semibold py-2.5 rounded-xl hover:bg-santander-green transition-colors">
-                Entendido
-            </button>
-        </div>
-    </div>
-
-    <!-- MÓDULO MODAL DE INICIO DE SESIÓN Y REGISTRO -->
-    <div id="auth-modal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-3xl max-w-md w-full overflow-hidden shadow-2xl relative border border-slate-100 modal-animate-in">
-            <!-- Botón Cerrar -->
-            <button onclick="closeAuthModal()" class="absolute top-5 right-5 text-slate-400 hover:text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-full w-8 h-8 flex items-center justify-center transition-colors z-10">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-
-            <!-- Encabezado con pestañas -->
-            <div class="bg-slate-50 p-6 pt-8 pb-4 border-b border-slate-100 text-center">
-                <div class="w-12 h-12 rounded-2xl bg-santander-gold text-white font-bold flex items-center justify-center text-xl mx-auto mb-3 shadow-md">
-                    B
-                </div>
-                <h3 class="text-2xl font-extrabold text-slate-900">¡Bienvenido a Bucaramanga!</h3>
-                <p class="text-xs text-slate-500 mt-1">Accede a tu cuenta para guardar lugares e itinerarios favoritos</p>
-
-                <!-- Selector de Pestañas (Tabs) -->
-                <div class="flex rounded-xl bg-slate-200/80 p-1 mt-6">
-                    <button id="tab-login-btn" onclick="switchAuthTab('login')" class="w-1/2 py-2 text-sm font-bold rounded-lg transition-all text-santander-emerald bg-white shadow-sm">
-                        Iniciar Sesión
-                    </button>
-                    <button id="tab-register-btn" onclick="switchAuthTab('register')" class="w-1/2 py-2 text-sm font-bold rounded-lg transition-all text-slate-500 hover:text-slate-800">
-                        Registrarse
-                    </button>
-                </div>
-            </div>
-
-            <div class="p-6">
-                <!-- FORMULARIO DE INICIO DE SESIÓN CON FIREBASE -->
-                <form id="login-form" onsubmit="window.handleFirebaseLogin(event)" class="space-y-4">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Correo Electrónico</label>
-                        <div class="relative">
-                            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400">
-                                <i class="fa-solid fa-envelope text-sm"></i>
-                            </span>
-                            <input type="email" id="login-email" required placeholder="tu@correo.com" class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-santander-emerald focus:ring-2 focus:ring-santander-emerald/20 transition-all">
-                        </div>
-                    </div>
-
-                    <div>
-                        <div class="flex justify-between items-center mb-1.5">
-                            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Contraseña</label>
-                            <a href="#" onclick="window.handlePasswordReset(); return false;" class="text-xs font-semibold text-santander-gold hover:underline">¿Olvidaste tu contraseña?</a>
-                        </div>
-                        <div class="relative">
-                            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400">
-                                <i class="fa-solid fa-lock text-sm"></i>
-                            </span>
-                            <input type="password" id="login-password" required placeholder="••••••••" class="w-full pl-10 pr-10 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-santander-emerald focus:ring-2 focus:ring-santander-emerald/20 transition-all">
-                            <button type="button" onclick="togglePasswordVisibility('login-password', this)" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600">
-                                <i class="fa-solid fa-eye text-sm"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="flex items-center justify-between text-xs pt-1">
-                        <label class="flex items-center space-x-2 text-slate-600 cursor-pointer">
-                            <input type="checkbox" class="rounded border-slate-300 text-santander-emerald focus:ring-santander-emerald">
-                            <span>Recordarme en este dispositivo</span>
-                        </label>
-                    </div>
-
-                    <button type="submit" id="login-submit-btn" class="w-full bg-santander-emerald hover:bg-santander-green text-white font-bold py-3.5 rounded-xl shadow-lg hover:shadow-emerald-900/20 transition-all transform hover:-translate-y-0.5 flex items-center justify-center space-x-2">
-                        <span>Ingresar a mi cuenta</span>
-                        <i class="fa-solid fa-arrow-right text-xs"></i>
-                    </button>
-                </form>
-
-                <!-- FORMULARIO DE REGISTRO CON FIREBASE -->
-                <form id="register-form" onsubmit="window.handleFirebaseRegister(event)" class="space-y-4 hidden">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Nombre Completo</label>
-                        <div class="relative">
-                            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400">
-                                <i class="fa-solid fa-user text-sm"></i>
-                            </span>
-                            <input type="text" id="register-name" required placeholder="Ej. Juan Silva" class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-santander-emerald focus:ring-2 focus:ring-santander-emerald/20 transition-all">
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Correo Electrónico</label>
-                        <div class="relative">
-                            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400">
-                                <i class="fa-solid fa-envelope text-sm"></i>
-                            </span>
-                            <input type="email" id="register-email" required placeholder="tu@correo.com" class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-santander-emerald focus:ring-2 focus:ring-santander-emerald/20 transition-all">
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Contraseña</label>
-                        <div class="relative">
-                            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400">
-                                <i class="fa-solid fa-lock text-sm"></i>
-                            </span>
-                            <input type="password" id="register-password" required minlength="6" placeholder="Mínimo 6 caracteres" class="w-full pl-10 pr-10 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-santander-emerald focus:ring-2 focus:ring-santander-emerald/20 transition-all">
-                            <button type="button" onclick="togglePasswordVisibility('register-password', this)" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600">
-                                <i class="fa-solid fa-eye text-sm"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="pt-1">
-                        <label class="flex items-start space-x-2 text-xs text-slate-600 cursor-pointer">
-                            <input type="checkbox" required class="rounded border-slate-300 text-santander-emerald focus:ring-santander-emerald mt-0.5">
-                            <span>Acepto los términos, condiciones y políticas de privacidad de uso del portal.</span>
-                        </label>
-                    </div>
-
-                    <button type="submit" id="register-submit-btn" class="w-full bg-santander-gold hover:bg-santander-goldlight text-white font-bold py-3.5 rounded-xl shadow-lg hover:shadow-orange-500/20 transition-all transform hover:-translate-y-0.5 flex items-center justify-center space-x-2">
-                        <span>Crear mi cuenta gratis</span>
-                        <i class="fa-solid fa-user-plus text-xs"></i>
-                    </button>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Footer -->
-    <footer class="bg-santander-dark text-slate-400 py-12 border-t border-slate-800">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex flex-col md:flex-row items-center justify-between gap-6">
-                <div class="flex items-center space-x-3">
-                    <div class="w-8 h-8 rounded-full bg-santander-gold flex items-center justify-center text-white font-bold text-sm">
-                        B
-                    </div>
-                    <span class="text-white font-bold text-lg">Bucaramanga, Santander</span>
-                </div>
-                
-                <p class="text-xs text-center md:text-left">
-                    © 2026 Guía Turística y Cultural de Bucaramanga. Hecho con <i class="fa-solid fa-heart text-amber-500"></i> para Colombia.
-                </p>
-
-                <div class="flex space-x-4 text-slate-300">
-                    <a href="#" class="hover:text-santander-gold transition-colors"><i class="fa-brands fa-facebook text-lg"></i></a>
-                    <a href="#" class="hover:text-santander-gold transition-colors"><i class="fa-brands fa-instagram text-lg"></i></a>
-                    <a href="#" class="hover:text-santander-gold transition-colors"><i class="fa-brands fa-x-twitter text-lg"></i></a>
-                </div>
-            </div>
-        </div>
-    </footer>
-
-    <!-- JavaScript Interactivo -->
-    <script>
-        // Toggle Menú Móvil
-        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
-        const mobileMenu = document.getElementById('mobile-menu');
-
-        if (mobileMenuBtn) {
-            mobileMenuBtn.addEventListener('click', () => {
-                mobileMenu.classList.toggle('hidden');
-            });
-        }
-
-        document.querySelectorAll('#mobile-menu a').forEach(link => {
-            link.addEventListener('click', () => {
-                mobileMenu.classList.add('hidden');
-            });
-        });
-
-        // --- CONTROL DEL MODAL DE AUTENTICACIÓN ---
-        const authModal = document.getElementById('auth-modal');
-        const loginForm = document.getElementById('login-form');
-        const registerForm = document.getElementById('register-form');
-        const tabLoginBtn = document.getElementById('tab-login-btn');
-        const tabRegisterBtn = document.getElementById('tab-register-btn');
-
-        function openAuthModal(tab = 'login') {
-            switchAuthTab(tab);
-            authModal.classList.remove('hidden');
-        }
-
-        function closeAuthModal() {
-            authModal.classList.add('hidden');
-        }
-
-        function switchAuthTab(tab) {
-            if (tab === 'login') {
-                loginForm.classList.remove('hidden');
-                registerForm.classList.add('hidden');
-                tabLoginBtn.className = "w-1/2 py-2 text-sm font-bold rounded-lg transition-all text-santander-emerald bg-white shadow-sm";
-                tabRegisterBtn.className = "w-1/2 py-2 text-sm font-bold rounded-lg transition-all text-slate-500 hover:text-slate-800";
-            } else {
-                loginForm.classList.add('hidden');
-                registerForm.classList.remove('hidden');
-                tabRegisterBtn.className = "w-1/2 py-2 text-sm font-bold rounded-lg transition-all text-santander-emerald bg-white shadow-sm";
-                tabLoginBtn.className = "w-1/2 py-2 text-sm font-bold rounded-lg transition-all text-slate-500 hover:text-slate-800";
-            }
-        }
-
-        function togglePasswordVisibility(inputId, btn) {
-            const input = document.getElementById(inputId);
-            const icon = btn.querySelector('i');
-            if (input.type === 'password') {
-                input.type = 'text';
-                icon.className = 'fa-solid fa-eye-slash text-sm';
-            } else {
-                input.type = 'password';
-                icon.className = 'fa-solid fa-eye text-sm';
-            }
-        }
-
-        // Toggle del Menú Desplegable de Usuario (Desktop)
-        const userMenuBtn = document.getElementById('user-menu-btn');
-        const userDropdown = document.getElementById('user-dropdown');
-
-        if(userMenuBtn) {
-            userMenuBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                userDropdown.classList.toggle('hidden');
-            });
-        }
-
-        // Cerrar dropdown al dar click afuera
-        window.addEventListener('click', () => {
-            if (userDropdown && !userDropdown.classList.contains('hidden')) {
-                userDropdown.classList.add('hidden');
-            }
-        });
-
-        // --- TOAST NOTIFICATIONS ---
-        function showNotification(title, message, type = 'success') {
-            const toast = document.getElementById('toast-notification');
-            const toastIconBg = document.getElementById('toast-icon-bg');
-            const toastIcon = document.getElementById('toast-icon');
-
-            document.getElementById('toast-title').textContent = title;
-            document.getElementById('toast-message').textContent = message;
-
-            if (type === 'error') {
-                toastIconBg.className = 'w-9 h-9 rounded-xl bg-red-500/20 text-red-400 flex items-center justify-center shrink-0';
-                toastIcon.className = 'fa-solid fa-circle-exclamation text-lg';
-            } else if (type === 'warning') {
-                toastIconBg.className = 'w-9 h-9 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0';
-                toastIcon.className = 'fa-solid fa-triangle-exclamation text-lg';
-            } else {
-                toastIconBg.className = 'w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0';
-                toastIcon.className = 'fa-solid fa-circle-check text-lg';
-            }
-
-            toast.classList.remove('translate-x-full');
-            
-            setTimeout(() => {
-                toast.classList.add('translate-x-full');
-            }, 4000);
-        }
-
-        // Filtro de categorías
-        function filterPlaces(category) {
-            const cards = document.querySelectorAll('.place-card');
-            const buttons = document.querySelectorAll('.filter-btn');
-
-            buttons.forEach(btn => {
-                btn.classList.remove('bg-santander-emerald', 'text-white', 'shadow-md');
-                btn.classList.add('bg-slate-100', 'text-slate-700');
-            });
-
-            event.target.classList.remove('bg-slate-100', 'text-slate-700');
-            event.target.classList.add('bg-santander-emerald', 'text-white', 'shadow-md');
-
-            cards.forEach(card => {
-                if (category === 'todos') {
-                    card.style.display = 'block';
-                } else {
-                    if (card.classList.contains(category)) {
-                        card.style.display = 'block';
-                    } else {
-                        card.style.display = 'none';
-                    }
-                }
-            });
-        }
-
-        // Control del Modal Informativo
-        const modal = document.getElementById('info-modal');
-        const modalTitle = document.getElementById('modal-title');
-        const modalDesc = document.getElementById('modal-desc');
-
-        function openModal(title, description) {
-            modalTitle.textContent = title;
-            modalDesc.textContent = description;
-            modal.classList.remove('hidden');
-        }
-
-        function closeModal() {
-            modal.classList.add('hidden');
-        }
-
-        window.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                closeModal();
-            }
-            if (e.target === authModal) {
+                await signInWithEmailAndPassword(auth, email, pass);
                 closeAuthModal();
+            } catch (err) {
+                showAuthAlert("Error al iniciar sesión: Verifique credenciales.");
             }
-        });
+        };
+
+        window.handleRegister = async () => {
+            const userVal = document.getElementById('authUserIdentifier').value.trim();
+            const pass = document.getElementById('authPassword').value;
+            const email = userVal.includes('@') ? userVal : `${userVal}@parqueadero.local`;
+
+            try {
+                const cred = await createUserWithEmailAndPassword(auth, email, pass);
+                await updateProfile(cred.user, { displayName: userVal });
+                closeAuthModal();
+            } catch (err) {
+                showAuthAlert("Error al registrarse: " + err.message);
+            }
+        };
+
+        window.handleSignOut = () => signOut(auth);
+
+        function showAuthAlert(msg) {
+            const el = document.getElementById('authAlert');
+            el.innerText = msg;
+            el.className = 'mb-4 p-3 rounded-lg text-xs font-semibold bg-rose-500/20 text-rose-300 border border-rose-500/30';
+            el.classList.remove('hidden');
+        }
+
+        window.filterTable = () => {
+            const q = document.getElementById('searchInput').value.toLowerCase();
+            const rows = document.querySelectorAll('#vehiclesTableBody tr');
+            rows.forEach(r => {
+                r.style.display = r.innerText.toLowerCase().includes(q) ? '' : 'none';
+            });
+        };
     </script>
 </body>
 </html>
